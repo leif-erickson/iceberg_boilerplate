@@ -1,0 +1,18 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'backend'
+    static_configs:
+      - targets: ['backend:8000']
+    metrics_path: /metrics
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']  # Assume you add postgres-exporter service if needed
+  - job_name: 'minio'
+    static_configs:
+      - targets: ['minio:9000']
+    metrics_path: /minio/prometheus/metrics
+  - job_name: 'node'  # System metrics
+    static_configs:
+      - targets: ['node-exporter:9100']  # Add node-exporter service for host metrics
