@@ -19,6 +19,22 @@ make all
 
 Pipeline order: **fixtures → ingest → bronze → GX → silver → GX → gold (dim + denorm) → pytest + dbt test**
 
+## Orchestration (Prefect) + metrics (Prometheus / Grafana)
+
+| Tool | UI | Use for |
+|------|-----|---------|
+| **Prefect** | http://localhost:4200 | Run history, retries, task timeline |
+| **Grafana** | http://localhost:3000 | Row counts, stage duration, success/fail |
+| Prometheus | http://localhost:9090 | Metrics store (scrape Pushgateway) |
+
+```bash
+make observability-up          # Prometheus + Grafana + Pushgateway + Prefect server
+make prefect                   # run flow; metrics -> Pushgateway
+# Grafana: admin / admin → dashboard "Medallion ETL"
+```
+
+See [observability/README.md](observability/README.md) for metric names and prod patterns.
+
 ## Gold mart styles
 
 ### Dimensional (Kimball)

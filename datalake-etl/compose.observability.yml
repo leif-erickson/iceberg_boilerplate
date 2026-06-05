@@ -1,0 +1,64 @@
+services:
+  pushgateway:
+    image: prom/pushgateway:v1.9.0
+    ports:
+      - "9091:9091"
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    volumes:
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    depends_on:
+      - pushgateway
+
+  grafana:
+    image: grafana/grafana:11.2.2
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_DEFAULT_THEME: light
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+
+  prefect-server:
+    image: prefecthq/prefect:3-python3.12
+    command: prefect server start --host 0.0.0.0
+    environment:
+      PREFECT_SERVER_API_HOST: 0.0.0.0
+      PREFECT_API_URL: http://localhost:4200/api
+    ports:
+      - "4200:4200"
+
+  etl-prefect:
+    build: .
+    profiles: ["run"]
+    volumes:
+      - ./lake:/lake
+      - ./dbt:/app/dbt
+      - ./sql:/app/sql
+      - ./scripts:/app/scripts
+      - ./ingest:/app/ingest
+      - ./orchestration:/app/orchestration
+      - ./quality:/app/quality
+    environment:
+      LAKE_ROOT: /lake
+      DS: ${DS:-2026-06-05}
+      PYTHONPATH: /app
+      DBT_PROFILES_DIR: /app/dbt
+      DBT_DUCKDB_PATH: /app/duckdb/local.duckdb
+      OPENLINEAGE_CONFIG: /app/quality/openlineage/openlineage.local.yml
+      OPENLINEAGE_NAMESPACE: datalake-etl
+      PREFECT_API_URL: http://prefect-server:4200/api
+      PROMETHEUS_PUSHGATEWAY_URL: http://pushgateway:9091
+      PROMETHEUS_JOB: medallion_etl
+    command: ["python", "orchestration/flows/medallion_flow.py"]
+    depends_on:
+      - prefect-server
+      - pushgateway

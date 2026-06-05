@@ -9,69 +9,50 @@ export PYTHONPATH := $(CURDIR)
 export DBT_DUCKDB_PATH := $(CURDIR)/duckdb/local.duckdb
 export OPENLINEAGE_CONFIG ?= quality/openlineage/openlineage.local.yml
 export OPENLINEAGE_NAMESPACE ?= datalake-etl
+export PROMETHEUS_PUSHGATEWAY_URL ?= http://localhost:9091
 export PATH := $(HOME)/.local/bin:$(PATH)
 
-.PHONY: help setup fixtures ingest bronze gx-bronze silver gx-silver gold gold-dimensional gold-denormalized test all clean docker-all lineage
+STAGES := fixtures ingest bronze gx-bronze silver gx-silver gold-dimensional gold-denormalized test
+
+.PHONY: help setup all prefect test gold lineage observability-up observability-down docker-all clean $(STAGES)
 
 help:
 	@echo "Targets:"
 	@echo "  make setup              Install Python deps"
-	@echo "  make fixtures           Sample staging data"
-	@echo "  make ingest             Thin Python -> staging/"
-	@echo "  make bronze             DuckDB SQL -> bronze/"
-	@echo "  make gx-bronze          Great Expectations on bronze"
-	@echo "  make silver             dbt run silver.*"
-	@echo "  make gx-silver          Great Expectations on silver"
-	@echo "  make gold               dbt run dimensional + denormalized marts"
-	@echo "  make gold-dimensional   Kimball-style dim + fact"
-	@echo "  make gold-denormalized  Wide / summary marts"
-	@echo "  make test               pytest + dbt test"
-	@echo "  make lineage            Show local OpenLineage events file"
-	@echo "  make all                Full pipeline"
+	@echo "  make all                Full pipeline (CLI + metrics)"
+	@echo "  make prefect            Run via Prefect flow"
+	@echo "  make observability-up   Prometheus + Grafana + Pushgateway + Prefect UI"
+	@echo "  make observability-down Stop observability stack"
+	@echo "  make lineage            Tail OpenLineage events"
 	@echo ""
 	@echo "Vars: DS=$(DS)  LAKE_ROOT=$(LAKE_ROOT)"
 
 setup:
 	pip install -r requirements.txt
 
-fixtures:
-	$(PYTHON) scripts/seed_fixtures.py --ds $(DS)
+$(STAGES):
+	$(PYTHON) scripts/run_pipeline.py $@
 
-ingest:
-	$(PYTHON) ingest/orders_api.py --ds $(DS) --lake-root $(LAKE_ROOT)
+gold:
+	$(PYTHON) scripts/run_pipeline.py gold
 
-bronze:
-	$(PYTHON) scripts/run_bronze.py --ds $(DS) --lake-root $(LAKE_ROOT)
+all:
+	$(PYTHON) scripts/run_pipeline.py all
 
-gx-bronze:
-	$(PYTHON) scripts/run_gx.py bronze --ds $(DS) --lake-root $(LAKE_ROOT)
-
-silver:
-	$(DBT_OL) run --project-dir dbt --profiles-dir dbt --select 'silver.*' \
-		--vars '{"ds": "$(DS)", "lake_root": "$(LAKE_ROOT)"}'
-
-gx-silver:
-	$(PYTHON) scripts/run_gx.py silver --ds $(DS) --lake-root $(LAKE_ROOT)
-
-gold-dimensional:
-	$(DBT_OL) run --project-dir dbt --profiles-dir dbt --select 'tag:dimensional' \
-		--vars '{"ds": "$(DS)", "lake_root": "$(LAKE_ROOT)"}'
-
-gold-denormalized:
-	$(DBT_OL) run --project-dir dbt --profiles-dir dbt --select 'tag:denormalized' \
-		--vars '{"ds": "$(DS)", "lake_root": "$(LAKE_ROOT)"}'
-
-gold: gold-dimensional gold-denormalized
+prefect:
+	$(PYTHON) orchestration/flows/medallion_flow.py
 
 test:
-	$(PYTHON) -m pytest tests/ -q
-	$(DBT) test --project-dir dbt --profiles-dir dbt \
-		--vars '{"ds": "$(DS)", "lake_root": "$(LAKE_ROOT)"}'
+	$(PYTHON) scripts/run_pipeline.py test
 
 lineage:
-	@test -f lineage/events.ndjson && tail -5 lineage/events.ndjson || echo "No lineage events yet. Run make bronze or make silver."
+	@test -f lineage/events.ndjson && tail -5 lineage/events.ndjson || echo "No lineage events yet."
 
-all: fixtures ingest bronze gx-bronze silver gx-silver gold test
+observability-up:
+	docker compose -f compose.observability.yml up -d pushgateway prometheus grafana prefect-server
+
+observability-down:
+	docker compose -f compose.observability.yml down
 
 docker-all:
 	DS=$(DS) docker compose run --rm etl all

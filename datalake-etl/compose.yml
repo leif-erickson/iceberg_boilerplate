@@ -12,6 +12,10 @@ services:
       LAKE_ROOT: /lake
       DS: ${DS:-2026-06-05}
       DBT_TARGET: local
+      OPENLINEAGE_CONFIG: /app/quality/openlineage/openlineage.local.yml
+      OPENLINEAGE_NAMESPACE: datalake-etl
+      PROMETHEUS_PUSHGATEWAY_URL: http://pushgateway:9091
+      PYTHONPATH: /app
     entrypoint: ["python", "scripts/run_pipeline.py"]
     command: ["all"]
 
