@@ -22,7 +22,7 @@ def test_full_local_pipeline(tmp_path: Path) -> None:
         "PATH": f"{Path.home() / '.local' / 'bin'}:{__import__('os').environ.get('PATH', '')}",
     }
 
-    for stage in ("fixtures", "ingest", "bronze", "silver", "gold"):
+    for stage in ("fixtures", "ingest", "bronze", "gx-bronze", "silver", "gx-silver", "gold"):
         subprocess.run(
             [sys.executable, str(ROOT / "scripts" / "run_pipeline.py"), stage],
             check=True,
@@ -30,7 +30,7 @@ def test_full_local_pipeline(tmp_path: Path) -> None:
             env=env,
         )
 
-    gold_path = lake / "gold" / "mart_revenue_daily" / f"dt={ds}" / "data.parquet"
+    gold_path = lake / "gold" / "denormalized" / "mart_revenue_daily" / f"dt={ds}" / "data.parquet"
     assert gold_path.exists()
 
     con = duckdb.connect()

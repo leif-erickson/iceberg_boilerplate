@@ -17,5 +17,10 @@ models:
       +tags: ["silver"]
       +materialized: table
     gold:
-      +tags: ["gold"]
-      +materialized: table
+      dimensional:
+        +tags: ["gold", "dimensional"]
+        +materialized: table
+      denormalized:
+        +tags: ["gold", "denormalized"]
+        +materialized: table
+

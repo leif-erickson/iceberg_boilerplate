@@ -1,6 +1,7 @@
 lake/
 staging/
-duckdb/*.db
+lineage/
+duckdb/*.duckdb
 dbt/target/
 dbt/logs/
 dbt/.user.yml

@@ -26,9 +26,26 @@ def duckdb_path() -> Path:
 
 def ensure_lake_dirs(base: str | Path, ds: str | None = None) -> None:
     base_path = Path(base)
-    for layer in ("staging/orders", "bronze/orders", "silver/orders", "gold/mart_revenue_daily"):
+    for layer in (
+        "staging/orders",
+        "bronze/orders",
+        "silver/orders",
+        "silver/customers",
+        "gold/dimensional/dim_customer",
+        "gold/dimensional/fct_orders",
+        "gold/denormalized/mart_orders_wide",
+        "gold/denormalized/mart_revenue_daily",
+    ):
         (base_path / layer).mkdir(parents=True, exist_ok=True)
     if ds:
-        for layer in ("bronze/orders", "silver/orders", "gold/mart_revenue_daily"):
+        for layer in (
+            "bronze/orders",
+            "silver/orders",
+            "silver/customers",
+            "gold/dimensional/dim_customer",
+            "gold/dimensional/fct_orders",
+            "gold/denormalized/mart_orders_wide",
+            "gold/denormalized/mart_revenue_daily",
+        ):
             (base_path / layer / f"dt={ds}").mkdir(parents=True, exist_ok=True)
         (base_path / "staging" / "orders" / ds).mkdir(parents=True, exist_ok=True)

@@ -6,19 +6,25 @@ import argparse
 from pathlib import Path
 
 from scripts.env import lake_root, partition_date
+from scripts.lineage import lineage_run, set_parent_run_env
 from scripts.run_sql import run_sql_file
 
 BRONZE_SQL_DIR = Path(__file__).resolve().parents[1] / "sql" / "bronze"
 
 
-def run_bronze(*, lake_root_value: str, ds: str) -> None:
+def run_bronze(*, lake_root_value: str, ds: str) -> str:
     sql_files = sorted(BRONZE_SQL_DIR.glob("*.sql"))
     if not sql_files:
         raise FileNotFoundError(f"No bronze SQL files in {BRONZE_SQL_DIR}")
 
-    for sql_file in sql_files:
-        run_sql_file(sql_file, lake_root_value=lake_root_value, ds=ds)
-        print(f"Bronze landed: {sql_file.name} -> ds={ds}")
+    inputs = [f"staging/orders/{ds}"]
+    outputs = [f"bronze/orders/dt={ds}"]
+    with lineage_run("bronze.orders", inputs=inputs, outputs=outputs) as run_id:
+        set_parent_run_env(run_id)
+        for sql_file in sql_files:
+            run_sql_file(sql_file, lake_root_value=lake_root_value, ds=ds)
+            print(f"Bronze landed: {sql_file.name} -> ds={ds}")
+    return run_id
 
 
 def main() -> None:

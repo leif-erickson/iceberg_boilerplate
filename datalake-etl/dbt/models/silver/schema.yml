@@ -17,3 +17,14 @@ models:
       - name: dt
         tests:
           - not_null
+
+  - name: customers
+    description: Conformed customers derived from silver orders
+    columns:
+      - name: customer_id
+        tests:
+          - unique
+          - not_null
+      - name: dt
+        tests:
+          - not_null

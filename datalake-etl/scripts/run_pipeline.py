@@ -9,7 +9,9 @@ import sys
 from pathlib import Path
 
 from scripts.env import duckdb_path, lake_root, partition_date
+from scripts.lineage import lineage_enabled
 from scripts.run_bronze import run_bronze
+from scripts.run_gx import run_gx
 from scripts.seed_fixtures import write_fixture
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -20,10 +22,17 @@ def pipeline_env() -> dict[str, str]:
     env["PYTHONPATH"] = str(ROOT)
     env.setdefault("DBT_PROFILES_DIR", str(ROOT / "dbt"))
     env.setdefault("DBT_DUCKDB_PATH", str(duckdb_path()))
+    env.setdefault("OPENLINEAGE_NAMESPACE", "datalake-etl")
+    if lineage_enabled() and not env.get("OPENLINEAGE_CONFIG") and not env.get("OPENLINEAGE_URL"):
+        env["OPENLINEAGE_CONFIG"] = str(ROOT / "quality" / "openlineage" / "openlineage.local.yml")
     return env
 
 
 def _dbt_executable() -> str:
+    if lineage_enabled():
+        dbt_ol = Path.home() / ".local" / "bin" / "dbt-ol"
+        if dbt_ol.exists():
+            return str(dbt_ol)
     local_dbt = Path.home() / ".local" / "bin" / "dbt"
     return str(local_dbt) if local_dbt.exists() else "dbt"
 
@@ -48,7 +57,19 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Run medallion ETL pipeline")
     parser.add_argument(
         "stage",
-        choices=["fixtures", "ingest", "bronze", "silver", "gold", "test", "all"],
+        choices=[
+            "fixtures",
+            "ingest",
+            "bronze",
+            "gx-bronze",
+            "silver",
+            "gx-silver",
+            "gold",
+            "gold-dimensional",
+            "gold-denormalized",
+            "test",
+            "all",
+        ],
         nargs="?",
         default="all",
     )
@@ -76,11 +97,20 @@ def main() -> None:
     if args.stage in {"bronze", "all"}:
         run_bronze(lake_root_value=args.lake_root, ds=args.ds)
 
+    if args.stage in {"gx-bronze", "all"}:
+        run_gx("bronze", lake_root_value=args.lake_root, ds=args.ds)
+
     if args.stage in {"silver", "all"}:
         run_dbt("run", args.ds, args.lake_root, select="silver.*")
 
-    if args.stage in {"gold", "all"}:
-        run_dbt("run", args.ds, args.lake_root, select="gold.*")
+    if args.stage in {"gx-silver", "all"}:
+        run_gx("silver", lake_root_value=args.lake_root, ds=args.ds)
+
+    if args.stage in {"gold", "gold-dimensional", "all"}:
+        run_dbt("run", args.ds, args.lake_root, select="tag:dimensional")
+
+    if args.stage in {"gold", "gold-denormalized", "all"}:
+        run_dbt("run", args.ds, args.lake_root, select="tag:denormalized")
 
     if args.stage in {"test", "all"}:
         subprocess.run(
