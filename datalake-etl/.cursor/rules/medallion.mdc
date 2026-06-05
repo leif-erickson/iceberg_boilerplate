@@ -1,0 +1,15 @@
+---
+description: DuckDB medallion ETL conventions for this repo
+globs: datalake-etl/**
+---
+
+# Medallion ETL rules
+
+- One engine: DuckDB + dbt-duckdb for bronze SQL, silver, and gold.
+- Partition all lake tables by `dt=YYYY-MM-DD` under `bronze/`, `silver/`, `gold/`.
+- Bronze is append/land only; business rules belong in silver+.
+- Gold models must `ref()` silver models, never read bronze directly.
+- Thin Python only in `ingest/` for IO that SQL cannot do.
+- Use `LAKE_ROOT` and `DS` env vars; never hardcode prod S3 paths in models.
+- Export lake files via `export_parquet` post-hook, not ad-hoc COPY in models.
+- Add dbt tests (`unique`, `not_null`) for primary keys on silver/gold.

@@ -1,0 +1,21 @@
+name: datalake_etl
+version: 1.0.0
+config-version: 2
+profile: etl
+
+model-paths: ["models"]
+macro-paths: ["macros"]
+test-paths: ["tests"]
+
+vars:
+  lake_root: "{{ env_var('LAKE_ROOT', './lake') }}"
+  ds: "{{ env_var('DS', '2026-06-05') }}"
+
+models:
+  datalake_etl:
+    silver:
+      +tags: ["silver"]
+      +materialized: table
+    gold:
+      +tags: ["gold"]
+      +materialized: table

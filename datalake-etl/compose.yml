@@ -1,0 +1,34 @@
+services:
+  etl:
+    build: .
+    volumes:
+      - ./lake:/lake
+      - ./dbt:/app/dbt
+      - ./sql:/app/sql
+      - ./scripts:/app/scripts
+      - ./ingest:/app/ingest
+      - ./tests/fixtures:/app/tests/fixtures
+    environment:
+      LAKE_ROOT: /lake
+      DS: ${DS:-2026-06-05}
+      DBT_TARGET: local
+    entrypoint: ["python", "scripts/run_pipeline.py"]
+    command: ["all"]
+
+  etl-shell:
+    build: .
+    volumes:
+      - ./lake:/lake
+      - ./dbt:/app/dbt
+      - ./sql:/app/sql
+      - ./scripts:/app/scripts
+      - ./ingest:/app/ingest
+      - ./tests/fixtures:/app/tests/fixtures
+    environment:
+      LAKE_ROOT: /lake
+      DS: ${DS:-2026-06-05}
+      DBT_PROFILES_DIR: /app/dbt
+      DBT_TARGET: local
+    entrypoint: ["/bin/bash"]
+    stdin_open: true
+    tty: true
