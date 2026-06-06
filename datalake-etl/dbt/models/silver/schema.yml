@@ -1,0 +1,30 @@
+version: 2
+
+models:
+  - name: orders
+    description: Conformed, deduplicated paid orders for the run partition
+    columns:
+      - name: order_id
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        tests:
+          - not_null
+      - name: amount_usd
+        tests:
+          - not_null
+      - name: dt
+        tests:
+          - not_null
+
+  - name: customers
+    description: Conformed customers derived from silver orders
+    columns:
+      - name: customer_id
+        tests:
+          - unique
+          - not_null
+      - name: dt
+        tests:
+          - not_null

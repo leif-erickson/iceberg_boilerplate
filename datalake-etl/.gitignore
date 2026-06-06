@@ -1,0 +1,12 @@
+lake/
+staging/
+lineage/
+duckdb/*.duckdb
+dbt/target/
+dbt/logs/
+dbt/.user.yml
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/

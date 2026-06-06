@@ -1,0 +1,21 @@
+version: 2
+
+models:
+  - name: mart_orders_wide
+    description: Denormalized wide mart for BI tools that prefer single-table models
+    columns:
+      - name: order_id
+        tests:
+          - unique
+          - not_null
+
+  - name: mart_revenue_daily
+    description: Denormalized daily revenue summary mart
+    columns:
+      - name: dt
+        tests:
+          - unique
+          - not_null
+      - name: revenue_usd
+        tests:
+          - not_null

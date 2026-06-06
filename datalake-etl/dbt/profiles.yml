@@ -1,0 +1,19 @@
+etl:
+  target: local
+  outputs:
+    local:
+      type: duckdb
+      path: "{{ env_var('DBT_DUCKDB_PATH', '../duckdb/local.duckdb') }}"
+      extensions:
+        - httpfs
+        - aws
+      settings:
+        s3_region: "{{ env_var('AWS_REGION', 'us-east-1') }}"
+    prod:
+      type: duckdb
+      path: "/tmp/prod.duckdb"
+      extensions:
+        - httpfs
+        - aws
+      settings:
+        s3_region: "{{ env_var('AWS_REGION', 'us-east-1') }}"

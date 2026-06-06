@@ -1,0 +1,105 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {"options": {"0": {"text": "FAIL"}}, "type": "value"},
+            {"options": {"1": {"text": "OK"}}, "type": "value"}
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "green", "value": 1}
+            ]
+          }
+        }
+      },
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+      "id": 1,
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center"},
+      "targets": [
+        {"expr": "max(etl_pipeline_last_success{pipeline=\"medallion-etl\"})", "refId": "A"}
+      ],
+      "title": "Pipeline last success (Prefect)",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "fieldConfig": {"defaults": {"unit": "s"}},
+      "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0},
+      "id": 2,
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(etl_pipeline_duration_seconds_bucket{pipeline=\"medallion-etl\"}[1h])) by (le))",
+          "refId": "A"
+        }
+      ],
+      "title": "Pipeline p95 duration",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "fieldConfig": {"defaults": {"unit": "short"}},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+      "id": 3,
+      "targets": [
+        {"expr": "max by (layer, entity) (etl_stage_rows)", "legendFormat": "{{layer}}/{{entity}}", "refId": "A"}
+      ],
+      "title": "Row counts by layer / entity",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "fieldConfig": {"defaults": {"unit": "s"}},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
+      "id": 4,
+      "targets": [
+        {
+          "expr": "max by (stage, layer) (etl_stage_duration_seconds_sum) / max by (stage, layer) (etl_stage_duration_seconds_count)",
+          "legendFormat": "{{stage}}/{{layer}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Average stage duration",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {"options": {"0": {"text": "FAIL"}}, "type": "value"},
+            {"options": {"1": {"text": "OK"}}, "type": "value"}
+          ]
+        }
+      },
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 12},
+      "id": 5,
+      "options": {"showHeader": true},
+      "targets": [
+        {"expr": "max by (stage, layer) (etl_stage_last_success)", "format": "table", "instant": true, "refId": "A"}
+      ],
+      "title": "Stage last success",
+      "transformations": [
+        {"id": "labelsToFields", "options": {"mode": "columns"}}
+      ],
+      "type": "table"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "tags": ["etl", "medallion", "duckdb"],
+  "time": {"from": "now-6h", "to": "now"},
+  "title": "Medallion ETL",
+  "uid": "medallion-etl",
+  "version": 1
+}

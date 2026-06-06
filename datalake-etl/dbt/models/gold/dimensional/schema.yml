@@ -1,0 +1,27 @@
+version: 2
+
+models:
+  - name: dim_customer
+    description: Customer dimension (one row per customer per partition day)
+    columns:
+      - name: customer_id
+        tests:
+          - unique
+          - not_null
+      - name: dt
+        tests:
+          - not_null
+
+  - name: fct_orders
+    description: Order fact linked to customer dimension
+    columns:
+      - name: order_id
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_customer')
+              field: customer_id

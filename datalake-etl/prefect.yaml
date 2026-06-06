@@ -1,0 +1,16 @@
+name: datalake-etl
+prefect-version: 3.0.0
+
+deployments:
+  - name: medallion-daily
+    entrypoint: orchestration/flows/medallion_flow.py:medallion_flow
+    work_pool:
+      name: local-process
+    schedule:
+      cron: "0 6 * * *"
+      timezone: UTC
+    parameters:
+      lake_root_value: "./lake"
+    tags:
+      - medallion
+      - duckdb

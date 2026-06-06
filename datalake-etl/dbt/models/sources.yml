@@ -1,0 +1,8 @@
+version: 2
+
+sources:
+  - name: bronze
+    description: Raw landed Parquet on the lake (read via lake_path macro in models)
+    tables:
+      - name: orders
+        description: Bronze orders partition for the run date

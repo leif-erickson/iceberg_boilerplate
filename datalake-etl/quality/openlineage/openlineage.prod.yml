@@ -1,0 +1,5 @@
+# Point at Marquez or your OpenLineage-compatible collector in prod.
+transport:
+  type: http
+  url: ${OPENLINEAGE_URL}
+  endpoint: /api/v1/lineage
