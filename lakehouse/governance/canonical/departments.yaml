@@ -1,0 +1,29 @@
+# Canonical department mappings with the organisation's internal convention.
+#
+# Internal convention:
+#   - `canonical`: the approved business name (Title Case).
+#   - `code`: a stable 2-letter uppercase code used in keys and file paths.
+#   - `aliases`: known raw spellings (any case, incl. non-English) that map here.
+#
+# `apply_canonical` matches an incoming value (case-insensitive, diacritics-scrubbed)
+# against the alias lists and rewrites it to `canonical`. Unmatched values become
+# `unmatched`, which a quality gate can then flag.
+name: departments
+description: Canonical department names and internal 2-letter codes.
+unmatched: __UNMAPPED__
+entries:
+  - canonical: People & Culture
+    code: PC
+    aliases: [hr, "human resources", "recursos humanos", rh, "people ops", "people and culture", "people & culture"]
+  - canonical: Finance
+    code: FI
+    aliases: [fin, finance, accounting, controlling, "fp&a"]
+  - canonical: Engineering
+    code: EN
+    aliases: [eng, engineering, "r&d", rnd, tech, technology, "ingenieria"]
+  - canonical: Sales
+    code: SA
+    aliases: [sales, "go to market", gtm, revenue, "ventas"]
+  - canonical: Marketing
+    code: MK
+    aliases: [mktg, marketing, growth, comms, communications]

@@ -1,0 +1,76 @@
+{
+  "title": "Lakehouse — Medallion & Data Quality",
+  "uid": "lakehouse-medallion",
+  "schemaVersion": 39,
+  "editable": true,
+  "time": { "from": "now-6h", "to": "now" },
+  "templating": {
+    "list": [
+      {
+        "name": "dataset",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "query": "label_values(lakehouse_stage_rows, dataset)",
+        "refresh": 2
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Quality gate status",
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 0 },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "type": "value", "options": { "0": { "text": "FAIL", "color": "red" } } },
+            { "type": "value", "options": { "1": { "text": "PASS", "color": "green" } } }
+          ]
+        }
+      },
+      "targets": [
+        { "expr": "lakehouse_quality_gate_pass{dataset=\"$dataset\"}", "legendFormat": "{{dataset}}" }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Failed quality checks",
+      "gridPos": { "h": 5, "w": 6, "x": 6, "y": 0 },
+      "targets": [
+        { "expr": "lakehouse_quality_checks_total{dataset=\"$dataset\",result=\"failed\"}", "legendFormat": "failed" }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Rows per stage",
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        { "expr": "lakehouse_stage_rows{dataset=\"$dataset\"}", "legendFormat": "{{stage}}" }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Stage duration (p95, seconds)",
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 9 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(lakehouse_stage_duration_seconds_bucket[5m])) by (le, stage))",
+          "legendFormat": "{{stage}}"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Stage last-run success (1=ok)",
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 9 },
+      "targets": [
+        { "expr": "lakehouse_stage_last_success", "legendFormat": "{{stage}}" }
+      ]
+    }
+  ]
+}

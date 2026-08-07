@@ -1,0 +1,13 @@
+.venv/
+.venv-soda/
+__pycache__/
+*.pyc
+lake/
+lineage/
+.dagster/
+dagster_home/
+# Terraform
+infra/terraform/.terraform/
+infra/terraform/*.tfstate
+infra/terraform/*.tfstate.*
+infra/terraform/.terraform.lock.hcl

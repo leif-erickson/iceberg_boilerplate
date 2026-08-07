@@ -1,0 +1,12 @@
+region      = "us-east-1"
+name_prefix = "acme-lakehouse"
+namespaces  = ["bronze", "silver", "gold"]
+
+# Register your data-platform role(s) as Lake Formation admins.
+# lakeformation_admins = ["arn:aws:iam::123456789012:role/data-platform"]
+
+tags = {
+  project = "lakehouse"
+  owner   = "data-platform"
+  managed = "terraform"
+}

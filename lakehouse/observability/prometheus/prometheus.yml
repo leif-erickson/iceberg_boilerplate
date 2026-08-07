@@ -1,0 +1,14 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  # Batch pipeline metrics are pushed to the Pushgateway (PROMETHEUS_PUSHGATEWAY_URL).
+  - job_name: pushgateway
+    honor_labels: true
+    static_configs:
+      - targets: ["pushgateway:9091"]
+
+  # Long-running workers can instead expose METRICS_PORT for a direct scrape.
+  - job_name: lakehouse
+    static_configs:
+      - targets: ["host.docker.internal:8001"]

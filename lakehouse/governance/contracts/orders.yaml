@@ -1,0 +1,71 @@
+# Data contract for the silver `orders` dataset.
+#
+# A contract is the single source of truth for a dataset: its schema (logical
+# data types), the per-field cleansing rules to apply, canonical mappings, and
+# the quality gates that must pass before the data is published. The same file
+# drives Polars cleansing, Pandera validation, Soda/GX checks, and the Iceberg
+# table schema.
+dataset: orders
+layer: silver
+owner: data-platform@example.com
+description: Customer orders, cleansed and canonicalised from raw ingestion.
+partition_by: [dt]
+
+fields:
+  - name: order_id
+    type: string
+    nullable: false
+    description: Natural key of the order.
+    cleansing: [trim, upper]
+
+  - name: customer_name
+    type: string
+    nullable: false
+    description: Customer full name, diacritics scrubbed for stable matching.
+    cleansing: [trim, scrub_diacritics, title_case]
+
+  - name: department
+    type: string
+    nullable: false
+    description: Owning department, mapped to the canonical convention.
+    canonical: departments
+    cleansing: [trim]
+
+  - name: order_ts_utc
+    type: timestamp
+    nullable: false
+    source_name: order_timestamp
+    description: Order time normalised to UTC ISO-8601. Source is US/Eastern local.
+    cleansing:
+      - rule: utc_iso8601
+        params:
+          assume_timezone: America/New_York
+
+  - name: amount_usd
+    type: double
+    nullable: false
+    source_name: amount
+    description: Order amount normalised from mixed EU/US number formats.
+    cleansing:
+      - rule: us_number_format
+        params:
+          source_format: auto
+
+quality_gates:
+  - name: keys_not_null
+    check: not_null
+    columns: [order_id, customer_name, department, order_ts_utc, amount_usd]
+  - name: unique_order_id
+    check: unique
+    columns: [order_id]
+  - name: amount_non_negative
+    check: range
+    column: amount_usd
+    min: 0
+  - name: department_is_canonical
+    check: allowed_values
+    column: department
+    from_canonical: departments
+  - name: has_rows
+    check: row_count
+    min: 1

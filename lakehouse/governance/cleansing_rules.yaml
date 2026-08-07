@@ -1,0 +1,27 @@
+# Reusable cleansing / normalization rule library.
+#
+# This is metadata only: it documents the rules the platform supports and their
+# default parameters. The executable implementations live in
+# `lakehouse/cleansing.py` and are dispatched by name. Data contracts reference
+# these rules per-field, so business/steward users can compose cleansing without
+# writing Python.
+rules:
+  trim:
+    description: Strip leading/trailing whitespace and collapse internal runs to a single space.
+  upper:
+    description: Uppercase the value.
+  lower:
+    description: Lowercase the value.
+  title_case:
+    description: Title-case each word (after diacritics scrub for consistent keys).
+  scrub_diacritics:
+    description: Unicode NFKD normalize then drop combining marks (e.g. "José" -> "Jose").
+  utc_iso8601:
+    description: Parse a timestamp, convert to UTC, and emit an ISO-8601 string. Naive inputs are interpreted in `assume_timezone`.
+    params:
+      assume_timezone: UTC
+  us_number_format:
+    description: Normalize mixed EU/US numeric strings to a US decimal float (e.g. "1.234,56" -> 1234.56).
+    params:
+      # auto: infer decimal separator from the string; eu: comma decimal; us: dot decimal.
+      source_format: auto
