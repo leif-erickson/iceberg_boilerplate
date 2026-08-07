@@ -7,8 +7,13 @@ generated from the same contract YAML.
 
 from __future__ import annotations
 
-import pandera.polars as pa
-import polars as pl
+import warnings
+
+# We use pandera's Polars engine, so pandas/numpy are intentionally absent.
+warnings.filterwarnings("ignore", message="Pandas and numpy have been removed", category=UserWarning)
+
+import pandera.polars as pa  # noqa: E402
+import polars as pl  # noqa: E402
 
 from lakehouse.registry import DataContract
 

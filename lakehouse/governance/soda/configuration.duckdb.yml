@@ -1,0 +1,6 @@
+# Soda Core data source for local DuckDB verification.
+#   soda scan -d lakehouse -c governance/soda/configuration.duckdb.yml governance/soda/orders.yml
+# The DuckDB file is built from the cleansed silver output (see README).
+data_source lakehouse:
+  type: duckdb
+  path: lake/soda.duckdb

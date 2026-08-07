@@ -1,4 +1,5 @@
 .venv/
+.venv-soda/
 __pycache__/
 *.pyc
 lake/
