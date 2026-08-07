@@ -1,0 +1,16 @@
+checks for orders:
+  - missing_count(order_id) = 0
+  - missing_count(customer_name) = 0
+  - missing_count(department) = 0
+  - missing_count(order_ts_utc) = 0
+  - missing_count(amount_usd) = 0
+  - duplicate_count(order_id) = 0
+  - min(amount_usd) >= 0
+  - invalid_count(department) = 0:
+      valid values:
+        - "People & Culture"
+        - "Finance"
+        - "Engineering"
+        - "Sales"
+        - "Marketing"
+  - row_count >= 1

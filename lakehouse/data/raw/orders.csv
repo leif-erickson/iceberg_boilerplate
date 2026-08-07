@@ -1,0 +1,7 @@
+order_id,customer_name,department,order_timestamp,amount
+ord-001,José García,HR,2026-06-05 09:30:00,"1.234,56"
+ord-002,Zoë Müller,Finance,2026-06-05 14:00:00,"2,500.00"
+ord-003,Renée Dubois,Engineering,2026/06/05 08:15,"999,99"
+ord-004,Åsa Lindström,sales,06/05/2026 16:45,"3 000,50"
+ord-005,Iván Núñez,mktg,2026-06-05T11:00:00-04:00,"1,000.00"
+ord-006,  Sørina  Bjørk ,people ops,2026-06-05 23:59:59,"0,00"

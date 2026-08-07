@@ -1,0 +1,9 @@
+# Local OpenLineage transport: append run events to lineage/events.ndjson.
+# In prod, replace with an http transport pointing at Marquez / DataHub /
+# OpenMetadata, e.g.:
+#   transport:
+#     type: http
+#     url: https://marquez.example.com
+transport:
+  type: file
+  log_file_path: lineage/events.ndjson
