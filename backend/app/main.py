@@ -1,6 +1,7 @@
 import os
 
 from fastapi import FastAPI, Depends, Response
+from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import SQLModel, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine
@@ -21,6 +22,16 @@ DATABASE_URL = os.getenv(
     "DATABASE_URL", "postgresql+asyncpg://user:password@postgres:5432/db"
 )
 engine = create_async_engine(DATABASE_URL, echo=True)
+
+# Allow the browser frontend (different origin/port) to call the API.
+# CORS_ORIGINS is a comma-separated list; "*" (the dev default) allows any origin.
+_cors_origins = os.getenv("CORS_ORIGINS", "*").split(",")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=_cors_origins,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 async def get_session() -> AsyncSession:
     async with AsyncSession(engine) as session:
