@@ -1,0 +1,17 @@
+{
+  "name": "FARM Stack (FastAPI + React + Postgres + MinIO)",
+  "user": "ubuntu",
+  "install": "bash .cursor/install.sh",
+  "start": "bash .cursor/start.sh",
+  "terminals": [
+    {
+      "name": "backend",
+      "command": "cd backend && source .venv/bin/activate && export DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/db MINIO_URL=http://localhost:9000 MINIO_ACCESS_KEY=minioadmin MINIO_SECRET_KEY=minioadmin && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+    },
+    {
+      "name": "frontend",
+      "command": "cd frontend && npm run dev"
+    }
+  ],
+  "ports": [8000, 3000, 9000, 9001, 5432]
+}
