@@ -9,3 +9,4 @@ docker==7.1.0
 pyiceberg[sql-postgres,fsspec,s3fs]==0.7.1
 psycopg2-binary==2.9.9
 boto3==1.35.28  # For Minio/S3 compatibility if needed
+minio==7.2.9  # S3-compatible client used for object uploads
