@@ -13,5 +13,11 @@
       "command": "cd frontend && npm run dev"
     }
   ],
-  "ports": [8000, 3000, 9000, 9001, 5432]
+  "ports": [
+    { "name": "backend", "port": 8000 },
+    { "name": "frontend", "port": 3000 },
+    { "name": "minio", "port": 9000 },
+    { "name": "minio-console", "port": 9001 },
+    { "name": "postgres", "port": 5432 }
+  ]
 }
